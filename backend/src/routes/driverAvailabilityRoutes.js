@@ -3,15 +3,17 @@ const router = express.Router();
 
 const {
     createAvailability,
-    getAvailability,
+    getAvailabilities,
+    getAvailabilityById,
     getAvailabilityByDriver,
     updateAvailability,
     deleteAvailability
 } = require("../controllers/driverAvailabilityController");
 
 router.post("/", createAvailability);
-router.get("/", getAvailability);
+router.get("/", getAvailabilities);
 router.get("/driver/:driverId", getAvailabilityByDriver);
+router.get("/:id", getAvailabilityById);
 router.put("/:id", updateAvailability);
 router.delete("/:id", deleteAvailability);
 

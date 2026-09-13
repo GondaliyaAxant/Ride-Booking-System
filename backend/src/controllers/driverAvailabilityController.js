@@ -64,7 +64,25 @@ const getAvailabilityById = async (req, res) => {
         });
     }
 };
+const getAvailabilityByDriver = async (req, res) => {
+    try {
+        const availabilities = await DriverAvailability.find({
+            driver: req.params.driverId
+        });
 
+        res.status(200).json({
+            success: true,
+            message: "Driver availabilities fetched successfully",
+            data: availabilities
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Failed to fetch driver availability",
+            error: error.message
+        });
+    }
+};
 // Update Availability
 const updateAvailability = async (req, res) => {
     try {
@@ -129,6 +147,7 @@ module.exports = {
     createAvailability,
     getAvailabilities,
     getAvailabilityById,
+    getAvailabilityByDriver,
     updateAvailability,
     deleteAvailability
 };

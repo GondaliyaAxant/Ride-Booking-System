@@ -39,8 +39,38 @@ const bookingSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "accepted", "ongoing", "completed", "cancelled"],
+      enum: [
+        "pending",
+        "accepted",
+        "ongoing",
+        "completed",
+        "cancelled",
+      ],
       default: "pending",
+    },
+
+    // Women safety feature
+    womenSafety: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Used only for female riders when no female driver is available
+    maleDriverConsent: {
+      type: String,
+      enum: [
+        "not_required",
+        "pending",
+        "accepted",
+        "declined",
+      ],
+      default: "not_required",
+    },
+
+    // Stores when the rider gave consent
+    consentAt: {
+      type: Date,
+      default: null,
     },
   },
   {

@@ -1,39 +1,41 @@
 const mongoose = require("mongoose");
 
 const driverAvailabilitySchema = new mongoose.Schema(
-  {
-    driver: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Driver",
-      required: true,
-    },
+    {
+        driver: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Driver",
+            required: true,
+        },
 
-    date: {
-      type: Date,
-      required: true,
-    },
+        date: {
+            type: Date,
+            required: true,
+        },
 
-    startTime: {
-      type: String,
-      required: true,
-    },
+        startTime: {
+            type: String,
+            required: true,
+        },
 
-    endTime: {
-      type: String,
-      required: true,
-    },
+        endTime: {
+            type: String,
+            required: true,
+        },
 
-    isAvailable: {
-      type: Boolean,
-      default: true,
+        isAvailable: {
+            type: Boolean,
+            default: true,
+        },
     },
-  },
-  {
-    timestamps: true,
-  }
+    {
+        timestamps: true,
+    }
 );
 
-module.exports = mongoose.model(
-  "DriverAvailability",
-  driverAvailabilitySchema
-);
+module.exports =
+    mongoose.models.DriverAvailability ||
+    mongoose.model(
+        "DriverAvailability",
+        driverAvailabilitySchema
+    );

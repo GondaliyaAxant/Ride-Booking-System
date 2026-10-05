@@ -4,58 +4,71 @@ const router = express.Router();
 
 const {
     createBooking,
+    routePreview,
+    updateWomenDriverConsent,
     getBookings,
     getBookingById,
     updateBooking,
     deleteBooking,
-    updateWomenDriverConsent,
+    getDriverPendingBookings,
+    acceptBookingByDriver,
 } = require("../controllers/bookingController");
 
 
-/*
-    Create booking
-    POST /api/bookings
-*/
-router.post("/", createBooking);
+router.post(
+    "/",
+    createBooking
+);
+
+router.post(
+    "/route-preview",
+    routePreview
+);
+
+router.get(
+    "/",
+    getBookings
+);
+
+router.get(
+    "/driver/:userId/pending",
+    getDriverPendingBookings
+);
+
+router.patch(
+    "/driver/:userId/:bookingId/accept",
+    acceptBookingByDriver
+);
+router.get(
+    "/:id",
+    getBookingById
+);
 
 
-/*
-    Get all bookings
-    GET /api/bookings
-*/
-router.get("/", getBookings);
-
-
-/*
-    Get booking by ID
-    GET /api/bookings/:id
-*/
-router.get("/:id", getBookingById);
-
-
-/*
-    Women safety consent
-
-    PUT /api/bookings/:id/women-driver-consent
-*/
 router.put(
-    "/:id/women-driver-consent",
-    updateWomenDriverConsent
+    "/:id",
+    updateBooking
+);
+
+
+router.delete(
+    "/:id",
+    deleteBooking
 );
 
 
 /*
-    Update booking
-    PUT /api/bookings/:id
-*/
-router.put("/:id", updateBooking);
-
-
-/*
-    Delete booking
-    DELETE /api/bookings/:id
-*/
-router.delete("/:id", deleteBooking);
+ * Female rider only.
+ *
+ * Used when:
+ * - women safety is active
+ * - no female driver is available
+ * - rider decides whether a male driver is acceptable
+ */
+router.patch(
+    "/:id/women-driver-consent",
+    updateWomenDriverConsent
+);
 
 
 module.exports = router;

@@ -1,13 +1,21 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const connectDB = require("./src/config/db");
+const adminRoutes = require("./src/routes/adminRoutes");
 
 const app = express();
 
 connectDB();
 
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
+
 app.use(express.json());
 
+app.use("/api/admin", adminRoutes);
 app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/users", require("./src/routes/userRoutes"));
 app.use("/api/drivers", require("./src/routes/driverRoutes"));

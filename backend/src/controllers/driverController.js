@@ -11,7 +11,7 @@ const createDriver = async (req, res) => {
             message: "Driver created successfully",
             data: savedDriver
         });
-    } catch (error) {
+    } catch (error                                                                                                                      1) {
         res.status(400).json({
             success: false,
             message: "Failed to create driver",

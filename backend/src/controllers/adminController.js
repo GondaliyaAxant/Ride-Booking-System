@@ -1,133 +1,69 @@
-const Admin = require("../models/admin");
+const jwt = require("jsonwebtoken");
 
-// Create Admin
-const createAdmin = async (req, res) => {
+const ADMIN_EMAIL = "admin1@gmail.com";
+const ADMIN_PASSWORD = "Admin1@123";
+
+const adminLogin = async (req, res) => {
     try {
-        const admin = new Admin(req.body);
-        const savedAdmin = await admin.save();
+        const { email, password } = req.body;
 
-        res.status(201).json({
-            success: true,
-            message: "Admin created successfully",
-            data: savedAdmin
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: "Failed to create admin",
-            error: error.message
-        });
-    }
-};
-
-// Get All Admins
-const getAdmins = async (req, res) => {
-    try {
-        const admins = await Admin.find();
-
-        res.status(200).json({
-            success: true,
-            message: "Admins fetched successfully",
-            data: admins
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch admins",
-            error: error.message
-        });
-    }
-};
-
-// Get Admin By ID
-const getAdminById = async (req, res) => {
-    try {
-        const admin = await Admin.findById(req.params.id);
-
-        if (!admin) {
-            return res.status(404).json({
+        if (!email || !password) {
+            return res.status(400).json({
                 success: false,
-                message: "Admin not found"
+                message: "Email and password are required",
             });
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Admin fetched successfully",
-            data: admin
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: "Invalid admin ID",
-            error: error.message
-        });
-    }
-};
+        // Check admin credentials defined in code
+        if (
+            email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase() ||
+            password !== ADMIN_PASSWORD
+        ) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid admin email or password",
+            });
+        }
 
-// Update Admin
-const updateAdmin = async (req, res) => {
-    try {
-        const admin = await Admin.findByIdAndUpdate(
-            req.params.id,
-            req.body,
+        // Create admin JWT
+        const token = jwt.sign(
             {
-                new: true,
-                runValidators: true
+                role: "admin",
+                email: ADMIN_EMAIL,
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1d",
             }
         );
 
-        if (!admin) {
-            return res.status(404).json({
-                success: false,
-                message: "Admin not found"
-            });
-        }
-
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            message: "Admin updated successfully",
-            data: admin
+            message: "Admin login successful",
+            token,
+            user: {
+                email: ADMIN_EMAIL,
+                role: "admin",
+            },
         });
     } catch (error) {
-        res.status(400).json({
+        console.error("Admin login error:", error);
+
+        return res.status(500).json({
             success: false,
-            message: "Failed to update admin",
-            error: error.message
+            message: "Admin login failed",
         });
     }
 };
 
-// Delete Admin
-const deleteAdmin = async (req, res) => {
-    try {
-        const admin = await Admin.findByIdAndDelete(req.params.id);
-
-        if (!admin) {
-            return res.status(404).json({
-                success: false,
-                message: "Admin not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Admin deleted successfully",
-            data: admin
-        });
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: "Failed to delete admin",
-            error: error.message
-        });
-    }
+const getAdminProfile = async (req, res) => {
+    return res.status(200).json({
+        success: true,
+        user: req.user,
+    });
 };
 
 module.exports = {
-    createAdmin,
-    getAdmins,
-    getAdminById,
-    updateAdmin,
-    deleteAdmin
+    adminLogin,
+    getAdminProfile,
 };

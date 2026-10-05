@@ -1,21 +1,47 @@
 const DriverAvailability = require("../models/driveravailability");
+const {
+    assignPendingBookingsForDriver,
+} = require("./bookingController");
 
 // Create Availability
 const createAvailability = async (req, res) => {
     try {
-        const availability = new DriverAvailability(req.body);
-        const savedAvailability = await availability.save();
+        const availability =
+            new DriverAvailability(req.body);
+
+        const savedAvailability =
+            await availability.save();
+
+        /*
+         * IMPORTANT:
+         *
+         * A driver has just become available.
+         * Check whether any pending booking can
+         * now be assigned to this driver.
+         */
+        if (savedAvailability.isAvailable) {
+            await assignPendingBookingsForDriver(
+                savedAvailability.driver
+            );
+        }
 
         res.status(201).json({
             success: true,
-            message: "Driver availability created successfully",
-            data: savedAvailability
+            message:
+                "Driver availability created successfully",
+            data: savedAvailability,
         });
     } catch (error) {
+        console.error(
+            "Create availability error:",
+            error
+        );
+
         res.status(400).json({
             success: false,
-            message: "Failed to create driver availability",
-            error: error.message
+            message:
+                "Failed to create driver availability",
+            error: error.message,
         });
     }
 };
@@ -86,32 +112,51 @@ const getAvailabilityByDriver = async (req, res) => {
 // Update Availability
 const updateAvailability = async (req, res) => {
     try {
-        const availability = await DriverAvailability.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true
-            }
-        );
+        const availability =
+            await DriverAvailability.findByIdAndUpdate(
+                req.params.id,
+                req.body,
+                {
+                    new: true,
+                    runValidators: true,
+                }
+            );
 
         if (!availability) {
             return res.status(404).json({
                 success: false,
-                message: "Driver availability not found"
+                message:
+                    "Driver availability not found",
             });
+        }
+
+        /*
+         * If driver switched availability ON,
+         * immediately try pending bookings.
+         */
+        if (availability.isAvailable) {
+            await assignPendingBookingsForDriver(
+                availability.driver
+            );
         }
 
         res.status(200).json({
             success: true,
-            message: "Driver availability updated successfully",
-            data: availability
+            message:
+                "Driver availability updated successfully",
+            data: availability,
         });
     } catch (error) {
+        console.error(
+            "Update availability error:",
+            error
+        );
+
         res.status(400).json({
             success: false,
-            message: "Failed to update driver availability",
-            error: error.message
+            message:
+                "Failed to update driver availability",
+            error: error.message,
         });
     }
 };

@@ -1,242 +1,162 @@
-import {
-    useEffect,
-    useState,
-} from "react";
-
-import {
-    Link,
-} from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../../api/axios";
 
 const AdminDashboard = () => {
-    const [stats, setStats] =
-        useState({
-            users: 0,
-            drivers: 0,
-            vehicles: 0,
-            bookings: 0,
-            payments: 0,
-            reports: 0,
-        });
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        load();
-    }, []);
-
-    const load = async () => {
-        const resources = [
-            "users",
-            "drivers",
-            "vehicles",
-            "bookings",
-            "payments",
-            "reports",
-        ];
-
-        const result = {};
-
-        await Promise.all(
-            resources.map(
-                async (resource) => {
-                    try {
-                        const response =
-                            await api.get(
-                                `/${resource}`
-                            );
-
-                        result[
-                            resource
-                        ] =
-                            (
-                                response
-                                    .data
-                                    .data ||
-                                []
-                            ).length;
-                    } catch {
-                        result[
-                            resource
-                        ] = 0;
-                    }
-                }
-            )
-        );
-
-        setStats(
-            (previous) => ({
-                ...previous,
-                ...result,
-            })
-        );
+    const loadStats = async () => {
+        try {
+            setLoading(true);
+            const res = await api.get("/admin/dashboard-stats");
+            setStats(res.data.data);
+        } catch (err) {
+            console.error("Failed to load admin stats:", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
+    useEffect(() => {
+        loadStats();
+    }, []);
+
     return (
-        <div>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px" }}>
+            {/* Header */}
+            <div style={{ marginBottom: "24px" }}>
+                <h1 style={{ margin: "0 0 4px", fontSize: "2rem" }}>Admin Dashboard</h1>
+                <p style={{ margin: 0, color: "#6b7280" }}>
+                    Platform overview, statistics, and Women Safety monitoring.
+                </p>
+            </div>
 
-            <div className="page-header">
-
-                <div>
-                    <h1>
-                        Admin Dashboard
-                    </h1>
-
-                    <p>
-                        Manage your entire
-                        RideBook platform.
-                    </p>
+            {loading ? (
+                <div style={{ textAlign: "center", padding: "40px", color: "#6b7280" }}>
+                    Loading platform analytics...
                 </div>
+            ) : (
+                <>
+                    {/* Primary Stats Grid */}
+                    <div className="stats-grid" style={{ marginBottom: "28px" }}>
+                        <Stat icon="👥" title="Total Registered Users" value={stats?.totalUsers || 0} />
+                        <Stat icon="🚗" title="Total Drivers" value={`${stats?.approvedDrivers || 0} Approved / ${stats?.totalDrivers || 0} Total`} />
+                        <Stat icon="📋" title="Total Bookings" value={stats?.totalBookings || 0} />
+                        <Stat icon="₹" title="Total Completed Revenue" value={`₹${stats?.totalRevenue || 0}`} />
+                    </div>
 
-            </div>
+                    {/* WOMEN SAFETY MONITORING CARD */}
+                    <div
+                        style={{
+                            background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)",
+                            border: "1px solid #fbcfe8",
+                            borderRadius: "16px",
+                            padding: "24px",
+                            marginBottom: "28px",
+                            boxShadow: "0 4px 14px rgba(219, 39, 119, 0.08)",
+                        }}
+                    >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+                            <span style={{ fontSize: "1.8rem" }}>🛡️</span>
+                            <div>
+                                <h2 style={{ margin: 0, fontSize: "1.3rem", color: "#9d174d" }}>
+                                    Women Safety Platform Metrics
+                                </h2>
+                                <p style={{ margin: "2px 0 0", color: "#831843", fontSize: "0.88rem" }}>
+                                    Live tracking of female rider preferences and male driver consent.
+                                </p>
+                            </div>
+                        </div>
 
-            <div className="stats-grid">
+                        <div
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr 1fr 1fr",
+                                gap: "16px",
+                            }}
+                        >
+                            <div style={{ background: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #fbcfe8" }}>
+                                <div style={{ color: "#9d174d", fontSize: "0.85rem", fontWeight: 600 }}>Total Women-Safety Rides</div>
+                                <strong style={{ fontSize: "1.6rem", color: "#831843" }}>{stats?.womenSafety?.total || 0}</strong>
+                            </div>
 
-                <Stat
-                    icon="👥"
-                    title="Users"
-                    value={
-                        stats.users
-                    }
-                />
+                            <div style={{ background: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #fbcfe8" }}>
+                                <div style={{ color: "#166534", fontSize: "0.85rem", fontWeight: 600 }}>Female Drivers Assigned</div>
+                                <strong style={{ fontSize: "1.6rem", color: "#15803d" }}>{stats?.womenSafety?.femaleDriversAssigned || 0}</strong>
+                            </div>
 
-                <Stat
-                    icon="🚗"
-                    title="Drivers"
-                    value={
-                        stats.drivers
-                    }
-                />
+                            <div style={{ background: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #fbcfe8" }}>
+                                <div style={{ color: "#c2410c", fontSize: "0.85rem", fontWeight: 600 }}>Male Consent Pending</div>
+                                <strong style={{ fontSize: "1.6rem", color: "#ea580c" }}>{stats?.womenSafety?.maleDriverConsentPending || 0}</strong>
+                            </div>
 
-                <Stat
-                    icon="🚘"
-                    title="Vehicles"
-                    value={
-                        stats.vehicles
-                    }
-                />
+                            <div style={{ background: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #fbcfe8" }}>
+                                <div style={{ color: "#1e40af", fontSize: "0.85rem", fontWeight: 600 }}>Male Consent Granted</div>
+                                <strong style={{ fontSize: "1.6rem", color: "#2563eb" }}>{stats?.womenSafety?.maleDriverConsentAccepted || 0}</strong>
+                            </div>
+                        </div>
+                    </div>
 
-                <Stat
-                    icon="📋"
-                    title="Bookings"
-                    value={
-                        stats.bookings
-                    }
-                />
-
-                <Stat
-                    icon="💳"
-                    title="Payments"
-                    value={
-                        stats.payments
-                    }
-                />
-
-                <Stat
-                    icon="⚠️"
-                    title="Reports"
-                    value={
-                        stats.reports
-                    }
-                />
-
-            </div>
-
-            <div className="quick-grid">
-
-                <AdminLink
-                    to="/admin/users"
-                    icon="👥"
-                    title="Users"
-                    text="Manage registered users"
-                />
-
-                <AdminLink
-                    to="/admin/drivers"
-                    icon="🚗"
-                    title="Drivers"
-                    text="Manage drivers"
-                />
-
-                <AdminLink
-                    to="/admin/vehicles"
-                    icon="🚘"
-                    title="Vehicles"
-                    text="Manage vehicles"
-                />
-
-                <AdminLink
-                    to="/admin/bookings"
-                    icon="📋"
-                    title="Bookings"
-                    text="Manage bookings"
-                />
-
-                <AdminLink
-                    to="/admin/payments"
-                    icon="💳"
-                    title="Payments"
-                    text="Manage payments"
-                />
-
-                <AdminLink
-                    to="/admin/reports"
-                    icon="⚠️"
-                    title="Reports"
-                    text="Review reports"
-                />
-
-            </div>
-
+                    {/* Quick Management Links */}
+                    <div className="quick-grid">
+                        <Link to="/admin/bookings" className="quick-card">
+                            <span style={{ fontSize: "2rem" }}>📋</span>
+                            <strong>Manage Bookings</strong>
+                            <small>Inspect rides, fares, and women-safety status</small>
+                        </Link>
+                        <Link to="/admin/drivers" className="quick-card">
+                            <span style={{ fontSize: "2rem" }}>🚗</span>
+                            <strong>Manage Drivers</strong>
+                            <small>Review, approve, or reject driver applications</small>
+                        </Link>
+                        <Link to="/admin/users" className="quick-card">
+                            <span style={{ fontSize: "2rem" }}>👥</span>
+                            <strong>Manage Users</strong>
+                            <small>View and manage registered riders and drivers</small>
+                        </Link>
+                        <Link to="/admin/vehicles" className="quick-card">
+                            <span style={{ fontSize: "2rem" }}>🚘</span>
+                            <strong>Manage Vehicles</strong>
+                            <small>Inspect registered vehicles and types</small>
+                        </Link>
+                        <Link to="/admin/payments" className="quick-card">
+                            <span style={{ fontSize: "2rem" }}>💳</span>
+                            <strong>Manage Payments</strong>
+                            <small>View transaction records</small>
+                        </Link>
+                        <Link to="/admin/reports" className="quick-card">
+                            <span style={{ fontSize: "2rem" }}>⚠️</span>
+                            <strong>Reports & Safety</strong>
+                            <small>Review user reports and disputes</small>
+                        </Link>
+                    </div>
+                </>
+            )}
         </div>
     );
 };
 
-const Stat = ({
-    icon,
-    title,
-    value,
-}) => (
-    <div className="stat-card">
-
-        <div className="stat-icon">
-            {icon}
-        </div>
-
-        <div>
-            <span>
-                {title}
-            </span>
-
-            <strong>
-                {value}
-            </strong>
-        </div>
-
-    </div>
-);
-
-const AdminLink = ({
-    to,
-    icon,
-    title,
-    text,
-}) => (
-    <Link
-        to={to}
-        className="quick-card"
+const Stat = ({ icon, title, value }) => (
+    <div
+        className="stat-card"
+        style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            padding: "20px",
+            background: "#ffffff",
+            borderRadius: "14px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+            border: "1px solid #f3f4f6",
+        }}
     >
-        <div className="quick-icon">
-            {icon}
+        <div style={{ fontSize: "2.2rem" }}>{icon}</div>
+        <div>
+            <div style={{ color: "#6b7280", fontSize: "0.85rem", fontWeight: 600 }}>{title}</div>
+            <strong style={{ fontSize: "1.5rem", color: "#111827" }}>{value}</strong>
         </div>
-
-        <strong>
-            {title}
-        </strong>
-
-        <small>
-            {text}
-        </small>
-    </Link>
+    </div>
 );
 
 export default AdminDashboard;

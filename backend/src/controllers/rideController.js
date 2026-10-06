@@ -1,4 +1,4 @@
-const Ride = require("../models/ride");
+const Ride = require("../models/Ride");
 
 // Create Ride
 const createRide = async (req, res) => {
@@ -9,13 +9,13 @@ const createRide = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "Ride created successfully",
-            data: savedRide
+            data: savedRide,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to create ride",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -23,18 +23,24 @@ const createRide = async (req, res) => {
 // Get All Rides
 const getRides = async (req, res) => {
     try {
-        const rides = await Ride.find();
+        const rides = await Ride.find()
+            .populate("rider", "name email phone gender")
+            .populate({
+                path: "driver",
+                populate: { path: "user", select: "name email phone gender" },
+            })
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
             message: "Rides fetched successfully",
-            data: rides
+            data: rides,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Failed to fetch rides",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -42,25 +48,30 @@ const getRides = async (req, res) => {
 // Get Ride By ID
 const getRideById = async (req, res) => {
     try {
-        const ride = await Ride.findById(req.params.id);
+        const ride = await Ride.findById(req.params.id)
+            .populate("rider", "name email phone gender")
+            .populate({
+                path: "driver",
+                populate: { path: "user", select: "name email phone gender" },
+            });
 
         if (!ride) {
             return res.status(404).json({
                 success: false,
-                message: "Ride not found"
+                message: "Ride not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Ride fetched successfully",
-            data: ride
+            data: ride,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Invalid ride ID",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -73,27 +84,27 @@ const updateRide = async (req, res) => {
             req.body,
             {
                 new: true,
-                runValidators: true
+                runValidators: true,
             }
         );
 
         if (!ride) {
             return res.status(404).json({
                 success: false,
-                message: "Ride not found"
+                message: "Ride not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Ride updated successfully",
-            data: ride
+            data: ride,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to update ride",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -106,20 +117,20 @@ const deleteRide = async (req, res) => {
         if (!ride) {
             return res.status(404).json({
                 success: false,
-                message: "Ride not found"
+                message: "Ride not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Ride deleted successfully",
-            data: ride
+            data: ride,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to delete ride",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -129,5 +140,5 @@ module.exports = {
     getRides,
     getRideById,
     updateRide,
-    deleteRide
+    deleteRide,
 };

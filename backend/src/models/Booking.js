@@ -6,17 +6,20 @@ const bookingSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true,
         },
 
         driver: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Driver",
             default: null,
+            index: true,
         },
 
         pickupLocation: {
             type: String,
             required: true,
+            trim: true,
         },
 
         pickupLatitude: {
@@ -32,6 +35,7 @@ const bookingSchema = new mongoose.Schema(
         dropLocation: {
             type: String,
             required: true,
+            trim: true,
         },
 
         dropLatitude: {
@@ -47,13 +51,16 @@ const bookingSchema = new mongoose.Schema(
         bookingDate: {
             type: Date,
             required: true,
+            index: true,
         },
 
-        /*
-         * IMPORTANT:
-         * Rider no longer sends the final fare.
-         * Backend calculates it from Google route distance.
-         */
+        scheduledAt: {
+            type: Date,
+            default: function () {
+                return this.bookingDate;
+            },
+        },
+
         fare: {
             type: Number,
             required: true,
@@ -88,45 +95,82 @@ const bookingSchema = new mongoose.Schema(
             enum: [
                 "pending",
                 "accepted",
+                "driver_arriving",
+                "driver_arrived",
                 "ongoing",
                 "completed",
                 "cancelled",
             ],
             default: "pending",
+            index: true,
         },
 
-        /*
-         * Women safety is automatically enabled
-         * ONLY for female riders.
-         */
+        paymentMethod: {
+            type: String,
+            enum: ["cash", "card", "upi"],
+            default: "cash",
+        },
+
+        paymentStatus: {
+            type: String,
+            enum: ["pending", "completed", "failed", "refunded"],
+            default: "pending",
+        },
+
+        // Women safety fields
         womenSafety: {
+            type: Boolean,
+            default: false,
+            index: true,
+        },
+
+        femaleDriverPreferred: {
             type: Boolean,
             default: false,
         },
 
         maleDriverConsent: {
             type: String,
-            enum: [
-                "not_required",
-                "pending",
-                "accepted",
-                "declined",
-            ],
+            enum: ["not_required", "pending", "accepted", "declined"],
             default: "not_required",
+            index: true,
         },
 
         consentAt: {
             type: Date,
             default: null,
         },
-    },
 
+        cancellationReason: {
+            type: String,
+            default: null,
+            trim: true,
+        },
+
+        // Track which drivers have rejected this booking so they don't see it again
+        rejectedBy: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Driver",
+            },
+        ],
+
+        // Timestamp when a driver accepted the booking
+        acceptedAt: {
+            type: Date,
+            default: null,
+        },
+    },
     {
         timestamps: true,
     }
 );
 
-module.exports = mongoose.model(
-    "Booking",
-    bookingSchema
-);
+bookingSchema.index({ user: 1, bookingDate: -1 });
+bookingSchema.index({ driver: 1, bookingDate: -1 });
+bookingSchema.index({ status: 1, bookingDate: 1 });
+bookingSchema.index({ driver: 1, status: 1 });
+bookingSchema.index({ rejectedBy: 1, status: 1 });
+
+module.exports =
+    mongoose.models.Booking || mongoose.model("Booking", bookingSchema);

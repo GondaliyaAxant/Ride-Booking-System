@@ -6,6 +6,7 @@ const notificationSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true,
         },
 
         title: {
@@ -24,12 +25,19 @@ const notificationSchema = new mongoose.Schema(
             type: String,
             enum: [
                 "ride",
+                "women_safety",
                 "payment",
                 "rating",
                 "report",
                 "system",
             ],
-            required: true,
+            default: "ride",
+        },
+
+        relatedBooking: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Booking",
+            default: null,
         },
 
         relatedRide: {
@@ -41,12 +49,15 @@ const notificationSchema = new mongoose.Schema(
         isRead: {
             type: Boolean,
             default: false,
+            index: true,
         },
     },
     {
         timestamps: true,
     }
 );
+
+notificationSchema.index({ user: 1, isRead: 1, createdAt: -1 });
 
 module.exports =
     mongoose.models.Notification ||

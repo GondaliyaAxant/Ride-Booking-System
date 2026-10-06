@@ -1,4 +1,4 @@
-const Vehicle = require("../models/vehicle");
+const Vehicle = require("../models/Vehicle");
 
 // Create Vehicle
 const createVehicle = async (req, res) => {
@@ -9,13 +9,13 @@ const createVehicle = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "Vehicle created successfully",
-            data: savedVehicle
+            data: savedVehicle,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to create vehicle",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -23,18 +23,23 @@ const createVehicle = async (req, res) => {
 // Get All Vehicles
 const getVehicles = async (req, res) => {
     try {
-        const vehicles = await Vehicle.find();
+        const vehicles = await Vehicle.find()
+            .populate({
+                path: "driver",
+                populate: { path: "user", select: "name email phone gender" },
+            })
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
             message: "Vehicles fetched successfully",
-            data: vehicles
+            data: vehicles,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Failed to fetch vehicles",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -42,25 +47,28 @@ const getVehicles = async (req, res) => {
 // Get Vehicle By ID
 const getVehicleById = async (req, res) => {
     try {
-        const vehicle = await Vehicle.findById(req.params.id);
+        const vehicle = await Vehicle.findById(req.params.id).populate({
+            path: "driver",
+            populate: { path: "user", select: "name email phone gender" },
+        });
 
         if (!vehicle) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Vehicle not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Vehicle fetched successfully",
-            data: vehicle
+            data: vehicle,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Invalid vehicle ID",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -73,27 +81,27 @@ const updateVehicle = async (req, res) => {
             req.body,
             {
                 new: true,
-                runValidators: true
+                runValidators: true,
             }
         );
 
         if (!vehicle) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Vehicle not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Vehicle updated successfully",
-            data: vehicle
+            data: vehicle,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to update vehicle",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -106,20 +114,20 @@ const deleteVehicle = async (req, res) => {
         if (!vehicle) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Vehicle not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Vehicle deleted successfully",
-            data: vehicle
+            data: vehicle,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to delete vehicle",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -129,5 +137,5 @@ module.exports = {
     getVehicles,
     getVehicleById,
     updateVehicle,
-    deleteVehicle
+    deleteVehicle,
 };

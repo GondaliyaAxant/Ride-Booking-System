@@ -6,12 +6,14 @@ const vehicleSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Driver",
             required: true,
+            index: true,
         },
 
         vehicleType: {
             type: String,
             enum: ["bike", "auto", "car"],
             required: true,
+            index: true,
         },
 
         brand: {
@@ -38,6 +40,7 @@ const vehicleSchema = new mongoose.Schema(
             unique: true,
             trim: true,
             uppercase: true,
+            index: true,
         },
 
         capacity: {
@@ -49,6 +52,7 @@ const vehicleSchema = new mongoose.Schema(
         isActive: {
             type: Boolean,
             default: true,
+            index: true,
         },
     },
     {
@@ -56,4 +60,5 @@ const vehicleSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model("Vehicle", vehicleSchema);
+module.exports =
+    mongoose.models.Vehicle || mongoose.model("Vehicle", vehicleSchema);

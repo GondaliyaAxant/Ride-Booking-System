@@ -1,4 +1,4 @@
-const Review = require("../models/review");
+const Review = require("../models/Review");
 
 // Create Review
 const createReview = async (req, res) => {
@@ -9,13 +9,13 @@ const createReview = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "Review created successfully",
-            data: savedReview
+            data: savedReview,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to create review",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -23,18 +23,21 @@ const createReview = async (req, res) => {
 // Get All Reviews
 const getReviews = async (req, res) => {
     try {
-        const reviews = await Review.find();
+        const reviews = await Review.find()
+            .populate("reviewer", "name email")
+            .populate("driver")
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
             message: "Reviews fetched successfully",
-            data: reviews
+            data: reviews,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Failed to fetch reviews",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -42,25 +45,27 @@ const getReviews = async (req, res) => {
 // Get Review By ID
 const getReviewById = async (req, res) => {
     try {
-        const review = await Review.findById(req.params.id);
+        const review = await Review.findById(req.params.id)
+            .populate("reviewer", "name email")
+            .populate("driver");
 
         if (!review) {
             return res.status(404).json({
                 success: false,
-                message: "Review not found"
+                message: "Review not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Review fetched successfully",
-            data: review
+            data: review,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Invalid review ID",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -73,27 +78,27 @@ const updateReview = async (req, res) => {
             req.body,
             {
                 new: true,
-                runValidators: true
+                runValidators: true,
             }
         );
 
         if (!review) {
             return res.status(404).json({
                 success: false,
-                message: "Review not found"
+                message: "Review not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Review updated successfully",
-            data: review
+            data: review,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to update review",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -106,20 +111,20 @@ const deleteReview = async (req, res) => {
         if (!review) {
             return res.status(404).json({
                 success: false,
-                message: "Review not found"
+                message: "Review not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Review deleted successfully",
-            data: review
+            data: review,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to delete review",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -129,5 +134,5 @@ module.exports = {
     getReviews,
     getReviewById,
     updateReview,
-    deleteReview
+    deleteReview,
 };

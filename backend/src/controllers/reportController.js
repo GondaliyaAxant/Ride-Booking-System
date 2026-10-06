@@ -9,13 +9,13 @@ const createReport = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "Report created successfully",
-            data: savedReport
+            data: savedReport,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to create report",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -23,18 +23,22 @@ const createReport = async (req, res) => {
 // Get All Reports
 const getReports = async (req, res) => {
     try {
-        const reports = await Report.find();
+        const reports = await Report.find()
+            .populate("reportedBy", "name email phone")
+            .populate("driver")
+            .populate("rider")
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
             message: "Reports fetched successfully",
-            data: reports
+            data: reports,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Failed to fetch reports",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -42,25 +46,28 @@ const getReports = async (req, res) => {
 // Get Report By ID
 const getReportById = async (req, res) => {
     try {
-        const report = await Report.findById(req.params.id);
+        const report = await Report.findById(req.params.id)
+            .populate("reportedBy", "name email phone")
+            .populate("driver")
+            .populate("rider");
 
         if (!report) {
             return res.status(404).json({
                 success: false,
-                message: "Report not found"
+                message: "Report not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Report fetched successfully",
-            data: report
+            data: report,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Invalid report ID",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -73,27 +80,27 @@ const updateReport = async (req, res) => {
             req.body,
             {
                 new: true,
-                runValidators: true
+                runValidators: true,
             }
         );
 
         if (!report) {
             return res.status(404).json({
                 success: false,
-                message: "Report not found"
+                message: "Report not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Report updated successfully",
-            data: report
+            data: report,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to update report",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -106,20 +113,20 @@ const deleteReport = async (req, res) => {
         if (!report) {
             return res.status(404).json({
                 success: false,
-                message: "Report not found"
+                message: "Report not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Report deleted successfully",
-            data: report
+            data: report,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to delete report",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -129,5 +136,5 @@ module.exports = {
     getReports,
     getReportById,
     updateReport,
-    deleteReport
+    deleteReport,
 };

@@ -2,17 +2,24 @@ const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema(
     {
+        booking: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Booking",
+            sparse: true,
+            index: true,
+        },
+
         ride: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Ride",
-            required: true,
-            unique: true,
+            sparse: true,
         },
 
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
+            index: true,
         },
 
         amount: {

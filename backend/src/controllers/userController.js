@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const User = require("../models/User");
 
 // Create User
 const createUser = async (req, res) => {
@@ -9,13 +9,13 @@ const createUser = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "User created successfully",
-            data: savedUser
+            data: savedUser,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to create user",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -23,18 +23,18 @@ const createUser = async (req, res) => {
 // Get All Users
 const getUsers = async (req, res) => {
     try {
-        const users = await User.find();
+        const users = await User.find().select("-password").sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
             message: "Users fetched successfully",
-            data: users
+            data: users,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Failed to fetch users",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -42,25 +42,25 @@ const getUsers = async (req, res) => {
 // Get User By ID
 const getUserById = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
+        const user = await User.findById(req.params.id).select("-password");
 
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "User not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "User fetched successfully",
-            data: user
+            data: user,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Invalid user ID",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -68,32 +68,29 @@ const getUserById = async (req, res) => {
 // Update User
 const updateUser = async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true
-            }
-        );
+        const { password, ...updateData } = req.body;
+        const user = await User.findByIdAndUpdate(req.params.id, updateData, {
+            new: true,
+            runValidators: true,
+        }).select("-password");
 
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "User not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "User updated successfully",
-            data: user
+            data: user,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to update user",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -106,20 +103,20 @@ const deleteUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: "User not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "User deleted successfully",
-            data: user
+            data: user,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to delete user",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -129,5 +126,5 @@ module.exports = {
     getUsers,
     getUserById,
     updateUser,
-    deleteUser
+    deleteUser,
 };

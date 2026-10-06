@@ -9,13 +9,13 @@ const createRating = async (req, res) => {
         res.status(201).json({
             success: true,
             message: "Rating created successfully",
-            data: savedRating
+            data: savedRating,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to create rating",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -23,18 +23,18 @@ const createRating = async (req, res) => {
 // Get All Ratings
 const getRatings = async (req, res) => {
     try {
-        const ratings = await Rating.find();
+        const ratings = await Rating.find().sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
             message: "Ratings fetched successfully",
-            data: ratings
+            data: ratings,
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Failed to fetch ratings",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -47,20 +47,20 @@ const getRatingById = async (req, res) => {
         if (!rating) {
             return res.status(404).json({
                 success: false,
-                message: "Rating not found"
+                message: "Rating not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Rating fetched successfully",
-            data: rating
+            data: rating,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Invalid rating ID",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -73,27 +73,27 @@ const updateRating = async (req, res) => {
             req.body,
             {
                 new: true,
-                runValidators: true
+                runValidators: true,
             }
         );
 
         if (!rating) {
             return res.status(404).json({
                 success: false,
-                message: "Rating not found"
+                message: "Rating not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Rating updated successfully",
-            data: rating
+            data: rating,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to update rating",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -106,20 +106,20 @@ const deleteRating = async (req, res) => {
         if (!rating) {
             return res.status(404).json({
                 success: false,
-                message: "Rating not found"
+                message: "Rating not found",
             });
         }
 
         res.status(200).json({
             success: true,
             message: "Rating deleted successfully",
-            data: rating
+            data: rating,
         });
     } catch (error) {
         res.status(400).json({
             success: false,
             message: "Failed to delete rating",
-            error: error.message
+            error: error.message,
         });
     }
 };
@@ -129,5 +129,5 @@ module.exports = {
     getRatings,
     getRatingById,
     updateRating,
-    deleteRating
+    deleteRating,
 };

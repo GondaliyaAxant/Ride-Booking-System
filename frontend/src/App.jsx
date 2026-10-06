@@ -22,6 +22,7 @@ import Dashboard from "./pages/Dashboard";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import BookRide from "./pages/rider/BookRide";
 import MyBookings from "./pages/rider/MyBookings";
+import BookingDetails from "./pages/rider/BookingDetails";
 import RiderNotifications from "./pages/rider/Notifications";
 import RiderProfile from "./pages/rider/Profile";
 
@@ -198,6 +199,11 @@ const AppLayout = () => {
                         <Route
                             path="/rider/bookings"
                             element={<MyBookings />}
+                        />
+
+                        <Route
+                            path="/rider/bookings/:id"
+                            element={<BookingDetails />}
                         />
 
                         <Route
